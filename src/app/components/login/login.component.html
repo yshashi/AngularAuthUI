@@ -16,7 +16,7 @@
                                 <div class="input-field" [class.error]="loginForm.controls['password'].dirty && loginForm.hasError('required','password')"> <span class="fa fa-lock px-2"></span> <input formControlName="password" [type]="type" placeholder="Password"> <button type="button" (click)="hideShowPass()" class="bg-white text-muted"> <span class="fa {{eyeIcon}}"></span> </button>                                    </div>
                             </div>
                             <small *ngIf="loginForm.controls['password'].dirty && loginForm.hasError('required','password')" class="text-danger">*Password is required*</small>
-                            <div class="form-inline fr mt-4"> <a id="forgot" data-bs-toggle="modal" data-bs-target="#exampleModal" class="font-weight-bold">Forgot password?</a> </div>
+                            <div class="form-inline fr mt-4"> <a id="forgot" data-bs-toggle="modal" data-bs-target="#forget-password" class="font-weight-bold">Forgot password?</a> </div>
                             <button type="submit" class="btn btn-primary btn-block mt-4 w-100">Login</button>
                             <div class="text-center pt-4 text-muted">Don't have an account? <a id="forgot" href="#" routerLink="/signup">Sign up</a> </div>
                         </form>
@@ -34,11 +34,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="forget-password" tabindex="-1" aria-labelledby="reset-passwordLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <p class="modal-title" id="exampleModalLabel"> <span style="font-size: 25px;font-weight:700">Forget your password?</span><br>
+                <p class="modal-title" id="forget-passwordLabel"> <span style="font-size: 25px;font-weight:700">Forget your password?</span><br>
                     <small>Please provide your E-mail we will send the reset link</small></p>
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -47,14 +47,16 @@
 
             <div class="modal-body">
                 <div class="form-group pt-3">
-                    <div class="input-field"> <span class="fa fa-user p-2"></span> <input type="text" placeholder="Email"> </div>
+                    <div class="input-field"> <span class="fa fa-user p-2"></span> <input [(ngModel)]="resetPasswordEmail" (ngModelChange)="checkValidEmail($event)" type="text" placeholder="Email"> </div>
                 </div>
-                <small class="text-danger">*Email is required*</small>
+                <small *ngIf="!resetPasswordEmail" class="text-danger">*Email is required*</small>
+                <small *ngIf="!isValidEmail && resetPasswordEmail" class="text-danger">*Email is invalid*</small>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Send</button>
+                <button type="button" id="closeBtn" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button (click)="confirmToReset()" [disabled]="!(isValidEmail && resetPasswordEmail)" type="button" class="btn btn-primary">Send</button>
             </div>
         </div>
     </div>
 </div>
+

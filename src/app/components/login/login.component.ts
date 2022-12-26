@@ -5,6 +5,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgToastService } from 'ng-angular-popup';
 import ValidateForm from 'src/app/helpers/validateform';
+import { ResetPasswordService } from 'src/app/services/reset-password.service';
 
 @Component({
   selector: 'app-login',
@@ -16,13 +17,15 @@ export class LoginComponent implements OnInit {
   type: string = 'password';
   isText: boolean = false;
   eyeIcon: string = 'fa-eye-slash';
+  resetPasswordEmail!: string;
   constructor(
     private fb: FormBuilder,
     private toast: NgToastService,
     private auth: AuthService,
     private router: Router,
-    private userStore: UserStoreService
-  ) {}
+    private userStore: UserStoreService,
+    private resetPasswordService: ResetPasswordService
+  ) { }
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -65,6 +68,33 @@ export class LoginComponent implements OnInit {
         duration: 5000,
       });
       ValidateForm.validateAllFormFields(this.loginForm);
+    }
+  }
+
+  public isValidEmail!: boolean;
+  checkValidEmail(event: string) {
+    const value = event;
+    const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    this.isValidEmail = pattern.test(value);
+    return this.isValidEmail;
+  }
+
+  confirmToReset() {
+    if (this.checkValidEmail(this.resetPasswordEmail)) {
+      this.resetPasswordService.sendResetPasswordLink(this.resetPasswordEmail)
+        .subscribe({
+          next: (res) => {
+            const buttonRef = document.getElementById("closeBtn");
+            buttonRef?.click();
+          },
+          error: (err) => {
+            this.toast.error({
+              detail: 'ERROR',
+              summary: 'Something went wrong!',
+              duration: 5000,
+            });
+          }
+        })
     }
   }
 }
