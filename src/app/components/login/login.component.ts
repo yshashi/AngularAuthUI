@@ -7,10 +7,14 @@ import { NgToastService } from 'ng-angular-popup';
 import ValidateForm from 'src/app/helpers/validateform';
 import { ResetPasswordService } from 'src/app/services/reset-password.service';
 
+import { SocialAuthService, SocialUser } from "@abacritt/angularx-social-login";
+import { GoogleLoginProvider } from "@abacritt/angularx-social-login";
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
+
 })
 export class LoginComponent implements OnInit {
   public loginForm!: FormGroup;
@@ -24,15 +28,45 @@ export class LoginComponent implements OnInit {
     private auth: AuthService,
     private router: Router,
     private userStore: UserStoreService,
-    private resetPasswordService: ResetPasswordService
+    private resetPasswordService: ResetPasswordService,
+    private authService: SocialAuthService
   ) { }
-
+  user!: SocialUser;
+  loggedIn!: boolean;
   ngOnInit() {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
     });
-    localStorage.removeItem('token')
+    localStorage.removeItem('token');
+
+    this.authService.authState.subscribe((user) => {
+      this.user = user;
+      this.loggedIn = (user != null);
+      if(this.loggedIn){
+
+        this.auth.signUp({username:user.email,password:'Admin@123',email:user.email,firstName:user.firstName,lastName:user.lastName || 'Yadav'})
+        .subscribe(res=>{
+
+          this.auth.signIn({username:user.email, password:'Admin@123',})
+          .subscribe(res=>{
+            this.router.navigate(['dashboard']);
+            this.toast.success({
+              detail: 'Success',
+              summary: 'Login Success',
+              duration: 5000,
+            });
+            this.auth.storeToken(res.accessToken!);
+            this.auth.storeRefreshToken(res.refreshToken!);
+            let decodedValue = this.auth.decodedToken();
+            this.userStore.storeFullName(decodedValue.name);
+            this.userStore.storeRole(decodedValue.role);
+          })
+        })
+        //this.auth.storeToken(user.idToken);
+      }
+      console.log(this.user, "user")
+    });
   }
 
   hideShowPass() {
@@ -96,5 +130,9 @@ export class LoginComponent implements OnInit {
           }
         })
     }
+  }
+  signInWithGoogle(): void {
+    this.authService.signIn(GoogleLoginProvider.PROVIDER_ID)
+      .then(() => this.router.navigate(['dashboard']));;
   }
 }
