@@ -33,7 +33,9 @@ export class ResetPasswordComponent implements OnInit {
     this.activated.queryParams.subscribe(val => {
       console.log(val);
       this.emailToReset = val['email'];
-      this.emailToken = val['code'];
+      let uriToken = (val['code']);
+      this.emailToken = uriToken.replace(/ /g, '+');
+      console.log(this.emailToken)
     });
   }
   reset() {

@@ -18,13 +18,13 @@ export class AuthGuard implements CanActivate {
     private auth: AuthService,
     private toast: NgToastService,
     private router: Router
-  ) {}
+  ) { }
   canActivate(): boolean {
     if (this.auth.isLoggedIn()) {
       return true;
     } else {
       this.router.navigate(['/'])
-      this.toast.error({detail:'ERROR', summary:"Please Login first!", duration:5000});
+      this.toast.error({ detail: 'ERROR', summary: "Please Login first!", duration: 5000 });
       return false
     }
   }
